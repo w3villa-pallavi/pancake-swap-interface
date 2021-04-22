@@ -45,7 +45,7 @@ const PanelFooter: React.FC<Props> = ({
 }) => {
   if (!isPushed) {
     return (
-      <Container>
+      <Container className="d-none">
         <IconButton variant="text" onClick={() => pushNav(true)}>
           <CogIcon />
         </IconButton>

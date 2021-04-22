@@ -35,85 +35,85 @@ export const links = [
       },
     ],
   },
-  {
-    label: "Farms",
-    icon: "FarmIcon",
-    href: "/farms",
-    status: status.LIVE,
-  },
-  {
-    label: "Pools",
-    icon: "PoolIcon",
-    href: "/syrup",
-  },
-  {
-    label: "Lottery",
-    icon: "TicketIcon",
-    href: "/lottery",
-  },
-  {
-    label: "NFT",
-    icon: "NftIcon",
-    href: "/nft",
-  },
-  {
-    label: "Team Battle",
-    icon: "TeamBattleIcon",
-    href: "/competition",
-    status: status.SOON,
-  },
-  {
-    label: "Profile & Teams",
-    icon: "GroupsIcon",
-    items: [
-      {
-        label: "Leaderboard",
-        href: "/teams",
-        status: status.NEW,
-      },
-      {
-        label: "YourProfile",
-        href: "/",
-      },
-    ],
-    calloutClass: "rainbow",
-  },
-  {
-    label: "Info",
-    icon: "InfoIcon",
-    items: [
-      {
-        label: "Overview",
-        href: "https://pancakeswap.info",
-      },
-      {
-        label: "Tokens",
-        href: "https://pancakeswap.info/tokens",
-      },
-      {
-        label: "Pairs",
-        href: "https://pancakeswap.info/pairs",
-      },
-      {
-        label: "Accounts",
-        href: "https://pancakeswap.info/accounts",
-      },
-    ],
-  },
-  {
-    label: "IFO",
-    icon: "IfoIcon",
-    items: [
-      {
-        label: "Next",
-        href: "/ifo",
-      },
-      {
-        label: "History",
-        href: "/ifo/history",
-      },
-    ],
-  },
+  // {
+  //   label: "Farms",
+  //   icon: "FarmIcon",
+  //   href: "/farms",
+  //   status: status.LIVE,
+  // },
+  // {
+  //   label: "Pools",
+  //   icon: "PoolIcon",
+  //   href: "/syrup",
+  // },
+  // {
+  //   label: "Lottery",
+  //   icon: "TicketIcon",
+  //   href: "/lottery",
+  // },
+  // {
+  //   label: "NFT",
+  //   icon: "NftIcon",
+  //   href: "/nft",
+  // },
+  // {
+  //   label: "Team Battle",
+  //   icon: "TeamBattleIcon",
+  //   href: "/competition",
+  //   status: status.SOON,
+  // },
+  // {
+  //   label: "Profile & Teams",
+  //   icon: "GroupsIcon",
+  //   items: [
+  //     {
+  //       label: "Leaderboard",
+  //       href: "/teams",
+  //       status: status.NEW,
+  //     },
+  //     {
+  //       label: "YourProfile",
+  //       href: "/",
+  //     },
+  //   ],
+  //   calloutClass: "rainbow",
+  // },
+  // {
+  //   label: "Info",
+  //   icon: "InfoIcon",
+  //   items: [
+  //     {
+  //       label: "Overview",
+  //       href: "https://pancakeswap.info",
+  //     },
+  //     {
+  //       label: "Tokens",
+  //       href: "https://pancakeswap.info/tokens",
+  //     },
+  //     {
+  //       label: "Pairs",
+  //       href: "https://pancakeswap.info/pairs",
+  //     },
+  //     {
+  //       label: "Accounts",
+  //       href: "https://pancakeswap.info/accounts",
+  //     },
+  //   ],
+  // },
+  // {
+  //   label: "IFO",
+  //   icon: "IfoIcon",
+  //   items: [
+  //     {
+  //       label: "Next",
+  //       href: "/ifo",
+  //     },
+  //     {
+  //       label: "History",
+  //       href: "/ifo/history",
+  //     },
+  //   ],
+  // },
   {
     label: "More",
     icon: "MoreIcon",
