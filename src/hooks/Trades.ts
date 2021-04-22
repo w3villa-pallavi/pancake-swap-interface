@@ -1,4 +1,4 @@
-import { Currency, CurrencyAmount, Pair, Token, Trade } from '@pancakeswap-libs/sdk'
+import { Currency, CurrencyAmount, Token } from '@pancakeswap-libs/sdk'
 import flatMap from 'lodash.flatmap'
 import { useMemo } from 'react'
 
@@ -7,6 +7,8 @@ import { PairState, usePairs } from '../data/Reserves'
 import { wrappedCurrency } from '../utils/wrappedCurrency'
 
 import { useActiveWeb3React } from './index'
+import Pair from '../pancakeswap-sdk/entities/pair';
+import { Trade } from '../pancakeswap-sdk/entities/trade';
 
 function useAllCommonPairs(currencyA?: Currency, currencyB?: Currency): Pair[] {
   const { chainId } = useActiveWeb3React()

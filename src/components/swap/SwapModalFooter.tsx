@@ -1,4 +1,4 @@
-import { Trade, TradeType } from '@pancakeswap-libs/sdk'
+import { TradeType } from '@pancakeswap-libs/sdk'
 import React, { useMemo, useState } from 'react'
 import { Text, Button } from '@pancakeswap-libs/uikit'
 import { Repeat } from 'react-feather'
@@ -16,6 +16,7 @@ import QuestionHelper from '../QuestionHelper'
 import { AutoRow, RowBetween, RowFixed } from '../Row'
 import FormattedPriceImpact from './FormattedPriceImpact'
 import { StyledBalanceMaxMini, SwapCallbackError } from './styleds'
+import { Trade } from '../../pancakeswap-sdk/entities/trade'
 
 export default function SwapModalFooter({
   trade,
