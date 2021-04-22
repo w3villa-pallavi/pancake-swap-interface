@@ -14,7 +14,7 @@ module.exports = {
             ref  : 'origin/main',
             repo : 'git@github.com:w3villa/yffii-swap-interface.git',
             path : '/home/ubuntu/yffii-swap-interface',
-            'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production && npm run build && pm2 serve yffii-swap-interface/current/build 3002 --name "yffii-swap-serve" --spa',
+            'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production && npm run build && pm2 serve yffii-swap-interface/current/build 3002 -n "yffii-swap-serve" --spa -f',
         }
     }
 };
