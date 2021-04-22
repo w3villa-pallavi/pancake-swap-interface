@@ -28,7 +28,7 @@ const useProps = () => {
     currentLang: "EN",
     cakePriceUsd: 0.023158668932877668,
     links,
-    profile: null,
+    profile: undefined,
   });
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const useProps = () => {
         currentLang: "EN",
         cakePriceUsd: 0.023158668932877668,
         links,
-        profile: null,
+        profile: undefined,
       });
     }, 2000);
     return () => {
@@ -87,7 +87,7 @@ export const NotConnected: React.FC = () => {
   return (
     <BrowserRouter>
       <Menu
-        account={null}
+        account={undefined}
         login={noop}
         logout={noop}
         isDark
