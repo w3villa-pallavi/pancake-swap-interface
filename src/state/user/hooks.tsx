@@ -1,4 +1,4 @@
-import { ChainId, Pair, Token } from '@pancakeswap-libs/sdk'
+import { ChainId, Token } from '@pancakeswap-libs/sdk'
 import flatMap from 'lodash.flatmap'
 import { useCallback, useMemo } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -22,6 +22,7 @@ import {
   unmuteAudio,
 } from './actions'
 import { setThemeCache } from '../../utils/theme'
+import Pair from '../../pancakeswap-sdk/entities/pair'
 
 function serializeToken(token: Token): SerializedToken {
   return {
@@ -192,7 +193,7 @@ export function usePairAdder(): (pair: Pair) => void {
  * @param tokenB the other token
  */
 export function toV2LiquidityToken([tokenA, tokenB]: [Token, Token]): Token {
-  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'Cake-LP', 'Pancake LPs')
+  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB, parseInt(process.env.REACT_APP_CHAIN_ID ?? '56')), 18, 'Cake-LP', 'Pancake LPs')
 }
 
 /**

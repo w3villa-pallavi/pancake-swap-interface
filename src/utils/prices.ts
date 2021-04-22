@@ -1,4 +1,4 @@
-import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount, Trade } from '@pancakeswap-libs/sdk'
+import { CurrencyAmount, Fraction, JSBI, Percent, TokenAmount } from '@pancakeswap-libs/sdk'
 import {
   BLOCKED_PRICE_IMPACT_NON_EXPERT,
   ALLOWED_PRICE_IMPACT_HIGH,
@@ -8,6 +8,7 @@ import {
 
 import { Field } from '../state/swap/actions'
 import { basisPointsToPercent } from './index'
+import { Trade } from '../pancakeswap-sdk/entities/trade'
 
 const BASE_FEE = new Percent(JSBI.BigInt(20), JSBI.BigInt(10000))
 const ONE_HUNDRED_PERCENT = new Percent(JSBI.BigInt(10000), JSBI.BigInt(10000))

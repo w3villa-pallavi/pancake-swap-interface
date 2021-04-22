@@ -1,5 +1,6 @@
-import { ChainId, JSBI, Pair, Route, Token, TokenAmount, Trade, TradeType } from '@pancakeswap-libs/sdk'
+import { ChainId, JSBI, Route, Token, TokenAmount, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import { computeTradePriceBreakdown } from './prices'
+import { Pair } from '../pancakeswap-sdk/entities/pair'
 
 describe('prices', () => {
   const token1 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18)

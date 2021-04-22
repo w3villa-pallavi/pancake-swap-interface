@@ -219,6 +219,7 @@ export function ListSelect({ onDismiss, onBack }: { onDismiss: () => void; onBac
     setAddError(null)
   }, [])
   const fetchList = useFetchListCallback()
+  console.log('fetchList: ', fetchList)
 
   const handleAddList = useCallback(() => {
     if (adding) return
