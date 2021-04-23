@@ -5,6 +5,8 @@ import { LogoIcon, Flex } from "@pancakeswap-libs/uikit";
 import { HamburgerIcon, HamburgerCloseIcon, LogoIcon as LogoWithText } from "../icons";
 import MenuButton from "./MenuButton";
 
+import Logomain from '../../../assets/logo.svg'
+
 interface Props {
   isPushed: boolean;
   isDark: boolean;
@@ -65,7 +67,9 @@ const Logo: React.FC<Props> = ({ isPushed, togglePush, isDark, href }) => {
           <HamburgerIcon width="24px" color="textSubtle" />
         )}
       </MenuButton>
-
+      <div>
+        <img src={Logomain} alt="logo" className="w-40 mr-10" />
+      </div>
       <div>
         <h1 className="font-22">YFFII.Finance</h1>
       </div>

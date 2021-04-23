@@ -52,6 +52,12 @@ const GlobalStyle = createGlobalStyle`
     background-color: #68be47;
     color: white;
   }
+  .w-40{
+    width: 40px;
+  }
+  .mr-10{
+    margin-right: 10px;
+  }
 `
 
 export default GlobalStyle
