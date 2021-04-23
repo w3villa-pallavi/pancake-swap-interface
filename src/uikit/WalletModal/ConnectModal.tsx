@@ -30,7 +30,7 @@ const ConnectModal: React.FC<Props> = ({ login, onDismiss = () => null }) => (
       />
     ))}
     <HelpLink
-      href="https://docs.pancakeswap.finance/guides/faq#how-do-i-set-up-my-wallet-on-binance-smart-chain"
+      href="https://docs.yffii.finance/guides/faq#how-do-i-set-up-my-wallet-on-binance-smart-chain"
       external
     >
       <HelpIcon color="primary" mr="6px" />
