@@ -1,8 +1,8 @@
-import { CurrencyAmount, JSBI, Token } from '@pancakeswap-libs/sdk'
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { CurrencyAmount, JSBI, Token, Trade } from '@pancakeswap-libs/sdk'
+import React, { useCallback, useContext, useEffect, useMemo, useState, useRef } from 'react'
 import { ArrowDown } from 'react-feather'
-import { CardBody, ArrowDownIcon, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
-import { ThemeContext } from 'styled-components'
+import { CardBody, ArrowDownIcon, Button, IconButton, Text, useModal, Link, Flex } from '@pancakeswap-libs/uikit'
+import styled, { ThemeContext } from 'styled-components'
 import AddressInputPanel from 'components/AddressInputPanel'
 import Card, { GreyCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
@@ -16,7 +16,9 @@ import { ArrowWrapper, BottomGrouping, SwapCallbackError, Wrapper } from 'compon
 import TradePrice from 'components/swap/TradePrice'
 import TokenWarningModal from 'components/TokenWarningModal'
 import SyrupWarningModal from 'components/SyrupWarningModal'
+import SafeMoonWarningModal from 'components/SafeMoonWarningModal'
 import ProgressSteps from 'components/ProgressSteps'
+import Container from 'components/Container'
 
 import { INITIAL_ALLOWED_SLIPPAGE } from 'constants/index'
 import { useActiveWeb3React } from 'hooks'
@@ -34,21 +36,39 @@ import Loader from 'components/Loader'
 import useI18n from 'hooks/useI18n'
 import PageHeader from 'components/PageHeader'
 import ConnectWalletButton from 'components/ConnectWalletButton'
+import V2ExchangeRedirectModal from 'components/V2ExchangeRedirectModal'
 import AppBody from '../AppBody'
 import { Trade } from '../../pancakeswap-sdk/entities/trade'
+
+const StyledLink = styled(Link)`
+  display: inline;
+  color: ${({ theme }) => theme.colors.failure};
+`
 
 const Swap = () => {
   const loadedUrlParams = useDefaultsFromURLSearch()
   const TranslateString = useI18n()
-
+  const [modalCountdownSecondsRemaining, setModalCountdownSecondsRemaining] = useState(5)
+  const [disableSwap, setDisableSwap] = useState(false)
+  const [hasPoppedModal, setHasPoppedModal] = useState(false)
+  const [interruptRedirectCountdown, setInterruptRedirectCountdown] = useState(false)
+  const [onPresentV2ExchangeRedirectModal] = useModal(
+    <V2ExchangeRedirectModal handleCloseModal={() => setInterruptRedirectCountdown(true)} />
+  )
+  const onPresentV2ExchangeRedirectModalRef = useRef(onPresentV2ExchangeRedirectModal)
   // token warning stuff
   const [loadedInputCurrency, loadedOutputCurrency] = [
     useCurrency(loadedUrlParams?.inputCurrencyId),
     useCurrency(loadedUrlParams?.outputCurrencyId),
   ]
   const [dismissTokenWarning, setDismissTokenWarning] = useState<boolean>(false)
-  const [isSyrup, setIsSyrup] = useState<boolean>(false)
-  const [syrupTransactionType, setSyrupTransactionType] = useState<string>('')
+  const [transactionWarning, setTransactionWarning] = useState<{
+    selectedToken: string | null
+    purchaseType: string | null
+  }>({
+    selectedToken: null,
+    purchaseType: null,
+  })
   const urlLoadedTokens: Token[] = useMemo(
     () => [loadedInputCurrency, loadedOutputCurrency]?.filter((c): c is Token => c instanceof Token) ?? [],
     [loadedInputCurrency, loadedOutputCurrency]
@@ -57,10 +77,12 @@ const Swap = () => {
     setDismissTokenWarning(true)
   }, [])
 
-  const handleConfirmSyrupWarning = useCallback(() => {
-    setIsSyrup(false)
-    setSyrupTransactionType('')
-  }, [])
+  const handleConfirmWarning = () => {
+    setTransactionWarning({
+      selectedToken: null,
+      purchaseType: null,
+    })
+  }
 
   const { account } = useActiveWeb3React()
   const theme = useContext(ThemeContext)
@@ -81,6 +103,55 @@ const Swap = () => {
   )
   const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
   const trade = showWrap ? undefined : v2Trade
+
+  // Manage disabled trading pairs that should redirect users to V2
+  useEffect(() => {
+    const disabledSwaps = ['BNB', 'BUSD', 'USDT', 'USDC', 'CAKE', 'BUNNY', 'ETH', 'BTCB', 'AUTO', 'XVS']
+    const inputCurrencySymbol = currencies[Field.INPUT]?.symbol || ''
+    const outputCurrencySymbol = currencies[Field.OUTPUT]?.symbol || ''
+    const doesInputMatch = disabledSwaps.includes(inputCurrencySymbol)
+    const doesOutputMatch = disabledSwaps.includes(outputCurrencySymbol)
+
+    if (doesInputMatch && doesOutputMatch) {
+      // Prevent infinite re-render of modal with this condition
+      if (!hasPoppedModal) {
+        setHasPoppedModal(true)
+        onPresentV2ExchangeRedirectModalRef.current()
+      }
+
+      // Controls the swap buttons being disabled & renders a message
+      setDisableSwap(true)
+
+      const tick = () => {
+        setModalCountdownSecondsRemaining((prevSeconds) => prevSeconds - 1)
+      }
+      const timerInterval = setInterval(() => tick(), 1000)
+
+      if (interruptRedirectCountdown) {
+        // Reset timer if countdown is interrupted
+        clearInterval(timerInterval)
+        setModalCountdownSecondsRemaining(5)
+      }
+
+      if (modalCountdownSecondsRemaining <= 0) {
+        window.location.href = 'https://exchange.pancakeswap.finance/#/swap'
+      }
+
+      return () => {
+        clearInterval(timerInterval)
+      }
+    }
+
+    // Unset disableSwap state if the swap inputs & outputs dont match disabledSwaps
+    setDisableSwap(false)
+    return undefined
+  }, [
+    currencies,
+    hasPoppedModal,
+    modalCountdownSecondsRemaining,
+    onPresentV2ExchangeRedirectModalRef,
+    interruptRedirectCountdown,
+  ])
 
   const parsedAmounts = showWrap
     ? {
@@ -218,27 +289,34 @@ const Swap = () => {
     setSwapState((prevState) => ({ ...prevState, tradeToConfirm: trade }))
   }, [trade])
 
-  // This will check to see if the user has selected Syrup to either buy or sell.
+  // This will check to see if the user has selected Syrup or SafeMoon to either buy or sell.
   // If so, they will be alerted with a warning message.
-  const checkForSyrup = useCallback(
+  const checkForWarning = useCallback(
     (selected: string, purchaseType: string) => {
-      if (selected === 'syrup') {
-        setIsSyrup(true)
-        setSyrupTransactionType(purchaseType)
+      if (['SYRUP', 'SAFEMOON'].includes(selected)) {
+        setTransactionWarning({
+          selectedToken: selected,
+          purchaseType,
+        })
       }
     },
-    [setIsSyrup, setSyrupTransactionType]
+    [setTransactionWarning]
   )
 
   const handleInputSelect = useCallback(
     (inputCurrency) => {
+      setHasPoppedModal(false)
+      setInterruptRedirectCountdown(false)
       setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
-      if (inputCurrency.symbol.toLowerCase() === 'syrup') {
-        checkForSyrup(inputCurrency.symbol.toLowerCase(), 'Selling')
+      if (inputCurrency.symbol === 'SYRUP') {
+        checkForWarning(inputCurrency.symbol, 'Selling')
+      }
+      if (inputCurrency.symbol === 'SAFEMOON') {
+        checkForWarning(inputCurrency.symbol, 'Selling')
       }
     },
-    [onCurrencySelection, setApprovalSubmitted, checkForSyrup]
+    [onCurrencySelection, setApprovalSubmitted, checkForWarning]
   )
 
   const handleMaxInput = useCallback(() => {
@@ -249,26 +327,32 @@ const Swap = () => {
 
   const handleOutputSelect = useCallback(
     (outputCurrency) => {
+      setHasPoppedModal(false)
+      setInterruptRedirectCountdown(false)
       onCurrencySelection(Field.OUTPUT, outputCurrency)
-      if (outputCurrency.symbol.toLowerCase() === 'syrup') {
-        checkForSyrup(outputCurrency.symbol.toLowerCase(), 'Buying')
+      if (outputCurrency.symbol === 'SYRUP') {
+        checkForWarning(outputCurrency.symbol, 'Buying')
+      }
+      if (outputCurrency.symbol === 'SAFEMOON') {
+        checkForWarning(outputCurrency.symbol, 'Buying')
       }
     },
-    [onCurrencySelection, checkForSyrup]
+    [onCurrencySelection, checkForWarning]
   )
 
   return (
-    <>
+    <Container>
       <TokenWarningModal
         isOpen={urlLoadedTokens.length > 0 && !dismissTokenWarning}
         tokens={urlLoadedTokens}
         onConfirm={handleConfirmTokenWarning}
       />
       <SyrupWarningModal
-        isOpen={isSyrup}
-        transactionType={syrupTransactionType}
-        onConfirm={handleConfirmSyrupWarning}
+        isOpen={transactionWarning.selectedToken === 'SYRUP'}
+        transactionType={transactionWarning.purchaseType}
+        onConfirm={handleConfirmWarning}
       />
+      <SafeMoonWarningModal isOpen={transactionWarning.selectedToken === 'SAFEMOON'} onConfirm={handleConfirmWarning} />
       <CardNav />
       <AppBody>
         <Wrapper id="swap-page">
@@ -381,6 +465,17 @@ const Swap = () => {
               )}
             </AutoColumn>
             <BottomGrouping>
+              {disableSwap && (
+                <Flex alignItems="center" justifyContent="center" mb="1rem">
+                  <Text color="failure">
+                    Please use{' '}
+                    <StyledLink external href="https://exchange.pancakeswap.finance">
+                      PancakeSwap V2
+                    </StyledLink>{' '}
+                    to make this trade
+                  </Text>
+                </Flex>
+              )}
               {!account ? (
                 <ConnectWalletButton width="100%" />
               ) : showWrap ? (
@@ -396,7 +491,7 @@ const Swap = () => {
                 <RowBetween>
                   <Button
                     onClick={approveCallback}
-                    disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                    disabled={disableSwap || approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
                     style={{ width: '48%' }}
                     variant={approval === ApprovalState.APPROVED ? 'success' : 'primary'}
                   >
@@ -427,7 +522,10 @@ const Swap = () => {
                     style={{ width: '48%' }}
                     id="swap-button"
                     disabled={
-                      !isValid || approval !== ApprovalState.APPROVED || (priceImpactSeverity > 3 && !isExpertMode)
+                      disableSwap ||
+                      !isValid ||
+                      approval !== ApprovalState.APPROVED ||
+                      (priceImpactSeverity > 3 && !isExpertMode)
                     }
                     variant={isValid && priceImpactSeverity > 2 ? 'danger' : 'primary'}
                   >
@@ -452,7 +550,9 @@ const Swap = () => {
                     }
                   }}
                   id="swap-button"
-                  disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
+                  disabled={
+                    disableSwap || !isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError
+                  }
                   variant={isValid && priceImpactSeverity > 2 && !swapCallbackError ? 'danger' : 'primary'}
                   width="100%"
                 >
@@ -469,7 +569,7 @@ const Swap = () => {
         </Wrapper>
       </AppBody>
       <AdvancedSwapDetailsDropdown trade={trade} />
-    </>
+    </Container>
   )
 }
 
